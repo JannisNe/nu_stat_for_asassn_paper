@@ -2,7 +2,7 @@ import matplotlib
 import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
-import os, requests
+import os, requests, warnings
 from astropy.time import Time
 from astropy.table import Table
 from astropy.coordinates import SkyCoord
@@ -10,6 +10,7 @@ from astropy.coordinates import SkyCoord
 import seaborn as sns
 import json
 from astropy.time import Time
+from astropy import units as u
 
 
 alerts_fn = 'data/ASASSN_sample_paper_IceCube_info.csv'
@@ -132,6 +133,31 @@ def hese_signalness(charge, verbose=True):
     _signalness = r.ns / (r.nb + r.ns)
     if verbose: print(f"Signalness={_signalness:.2f} for charge {charge}")
     return _signalness
+
+
+def get_closest_obs_df():
+    with open("data/image_time", "r") as f:
+        lines = f.read().split("\n")
+
+    dat = list()
+
+    for l in lines[1:-1]:
+        name = l[:9]
+        times = l[11:].split("\t")
+        times_formatted = list()
+        for t in times:
+            if t:
+                if t != "NaN":
+                    val, unit = t.split(" ")
+                    unit = "s" if unit == "sec" else unit
+                    times_formatted.append((float(val) * u.Unit(unit)).to("h").value)
+                else:
+                    times_formatted.append(np.nan)
+            
+        dat.append(tuple([name] + times_formatted))
+        
+    closest_obs = pd.DataFrame(dat, columns=lines[0].replace(" ", "").split("\t")[:-1])
+    return closest_obs
     
 
 def make_alerts():
@@ -155,18 +181,46 @@ def make_alerts():
         m = (comb.Event == row.Event) & (comb.Class == row.Class)
         comb.loc[m, new_cols] = parse_notice_info(row['Event'], row['Class'])
         
-    for i, r in comb[comb.Class == 'HESE'].iterrows():
-        selected, pos, error = get_notice_info(r.Event, r.Class)
-        im = (comb.index == i) & (comb.Class == 'HESE')
-        comb.loc[im, 'Signalness'] = hese_signalness(selected['OBSERVATION']['Charge'])
+#     for i, r in comb[comb.Class == 'HESE'].iterrows():
+#         selected, pos, error = get_notice_info(r.Event, r.Class)
+#         im = (comb.index == i) & (comb.Class == 'HESE')
+#         estimated_signalness = hese_signalness(selected['OBSERVATION']['Charge'])
+#         bigger_than_trackness = estimated_signalness > selected['OBSERVATION']['SignalTr']
+#         if np.any(bigger_than_trackness):
+#             #raise Exception(r, selected)
+#             warnings.warn(f"{r}\n{selected}")
+        
+#         comb.loc[im, 'Signalness'] = estimated_signalness
+        
         
     comb.loc[comb.Class == 'EXTRA', 'Signalness'] = 0.5
+    comb.loc[comb.Class == 'HESE', 'Signalness'] = np.nan
 
     comb['retracted'] = (comb['Rejection reason'] == 'Alert retraction') | (comb['Rejection reason'] == 'Alert Retraction')
+    comb['direction uncertainty missing'] = False
+    comb.loc[(comb.Event == 'IC190504A') | (comb.Event == 'IC200227A'), 'direction uncertainty missing'] = True
+    
+    comb['reason'] = ''
+    for k in ['retracted', 'direction uncertainty missing']:
+        comb.loc[comb[k], 'reason'] = k
 
-    keep_cols = ['Event', 'Class', 'RA', 'RA Unc (rectangle)', 'Dec',
-           'Dec Unc (rectangle)', 'arrival time [UT]', 'Signalness',
-           'initial RA', 'initial Dec', 'initial Error90 [arcmin]', 'retracted']
+    keep_cols = [
+        'Event', 
+        'Class', 
+        'RA', 
+        'RA Unc (rectangle)', 
+        'Dec',
+        'Dec Unc (rectangle)', 
+        'arrival time [UT]', 
+        'Signalness',
+        'initial RA', 
+        'initial Dec', 
+        'initial Error90 [arcmin]',
+        'retracted',
+        'direction uncertainty missing',
+        'reason'
+    ]
+    
     out = comb[keep_cols].sort_values('Event')
     print(f"saved under {alerts_fn}")
     out.to_csv(alerts_fn)
@@ -185,16 +239,42 @@ def get_alerts():
     for col in ["RA Unc (rectangle)", "Dec Unc (rectangle)"]:
         alerts[col + ' float'] = alerts[col].apply(floatify)
 
-    covered = pd.read_csv("data/coverage_time", sep='\t', names=['Event', '2h coverage', '14d coverage', 'None'], skiprows=1)
+    names = ['Event', '1h', '2h', '4h', '8h', '12h', '24h', '2d', '3d', '4d', '5d', '6d', '7d', '14d']
+    for i in range(1, len(names)):
+        names[i] += ' coverage'
+
+    covered = pd.read_csv("data/coverage_time_Jannis", sep='\t', names=names, skiprows=1)
     m = np.array([r.Event in list(covered.Event) for _, r in alerts.iterrows()])
 
-    for k in ["2h coverage", "14d coverage"]:
+    for k in names[1:]:
         alerts[k] = np.nan
         for i, r in covered.iterrows():
             m = alerts.Event == r.Event
             alerts.loc[m, k] = r[k]
 
-    alerts['observed'] = (alerts['2h coverage'] > 0) | (alerts['14d coverage'] > 0)
+    alerts['observed'] = alerts['14d coverage'] > 0
+    alerts.loc[~alerts.observed & ~alerts.retracted & ~alerts["direction uncertainty missing"], 'reason'] = 'proximity to sun'
+    alerts.loc[alerts.Event == 'IC200421A', 'reason'] = 'operation'
+    
+    # -------------------------------- ADD CLOSEST OBSERVATION -------------------------------- #
+    closest_obs = get_closest_obs_df()
+    
+    for i, r in closest_obs.iterrows():
+        alerts_m = alerts.Event == r.Event
+        alerts.loc[alerts_m, "controll_Event"] = r.Event
+        
+        for k in ["Before", "After"]:
+            alerts.loc[alerts_m, k] = r[k]
+
+    controll_m = alerts.Event[alerts.observed] == alerts.controll_Event[alerts.observed]
+    if not np.all(controll_m):
+        raise Exception(f"alerts missmatch!\n{alerts[alerts.observed][controll_m].to_string()}")
+        
+    alerts["closest_obs"] = np.fmin(alerts.After, alerts.Before)
+    alerts["closest_obs_side"] = "Before"
+    alerts.loc[alerts.After <= alerts.Before, "closest_obs_side"] = "After"
+    alerts.loc[alerts.closest_obs.isna(), "closest_obs_side"] = np.nan
+    
     return alerts
     
 if __name__ == "__main__":
