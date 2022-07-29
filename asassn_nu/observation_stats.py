@@ -1,9 +1,11 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import os
-from alerts import get_alerts
-from style import output_folder_figures, big_fontsize, base_width, base_height, dpi, CB_color_cycle
 from astropy.time import Time
+
+from asassn_nu.alerts import get_alerts
+from asassn_nu.style import big_fontsize, base_width, base_height, dpi, CB_color_cycle
+from asassn_nu.info import output_folder_figures
 
 
 def make_obs_plots():

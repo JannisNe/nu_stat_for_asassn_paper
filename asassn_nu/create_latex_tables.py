@@ -2,8 +2,9 @@ import numpy as np
 import os
 from astropy.coordinates import SkyCoord, get_sun
 from alerts import get_alerts
-from style import output_folder_latex
 from astropy.time import Time
+
+from asassn_nu.info import output_folder_latex
 
 
 def make_latex_tables():

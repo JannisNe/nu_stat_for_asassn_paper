@@ -1,35 +1,25 @@
-import re # use regular patters
-import sys # system commands
-import string as string # string functions4
-import math
-import numpy as np # numerical tools
-from scipy import *
-import os, io
+import numpy as np
+import os
+import io
 import pandas as pd
-from matplotlib.pyplot import figure, show, rcParams
 import matplotlib.pyplot as plt
 
-# plt.rcParams['legend.numpoints']=1
-# plt.rcParams['xtick.major.size'] = 11
-# plt.rcParams['xtick.minor.size'] = 5
-# plt.rcParams['ytick.major.size'] = 11
-# plt.rcParams['ytick.minor.size'] = 5
-# plt.rcParams['text.latex.preamble'] = [r'\boldmath']
-# params = {'text.usetex': True, 'mathtext.fontset': 'stixsans'}
-# rcParams.update(params)
+from asassn_nu.info import output_folder_figures
 
-#event
-names=np.array(['AT2020rng','AT2020idu','AT2019fxr','AT2019dsg','SN2019aah','AT2018dyd','SN2018coq','AT2017hzv'])
+candidates_lc_dir = os.path.join(output_folder_figures, '/candidates_lightcurves')
+
+
+# Candidate counterparts
+names = np.array(['AT2020rng','AT2020idu','AT2019fxr','AT2019dsg','SN2019aah','AT2018dyd','SN2018coq','AT2017hzv'])
 nu_names = np.array(["IC210608A", "IC200530A", "IC200410A", "IC191001A", "IC191119A", "IC191001A", "IC190619A", "IC180908A"])
 types = np.array(['Unknown', 'Dwarf Nova', 'Unknown', 'TDE', 'SN II', 'Unknown', 'SN II', 'Unknown'])
-ra=np.array([333.1687755,253.335125,242.066735231,314.2623926,225.377973463,314.0556855,343.776167,144.801206241])
-dec=np.array([+18.0510409,+27.435711,+6.82921933663,14.2044063,+4.87828907113,+12.8536367,+11.257611,-1.3396342480])
-JDasassn=np.array([2459089.9,2458962.9,2458634.9,2458618.9,2458519.6,2458316.8,2458286.1,2458070.8])
-JDicecube=np.array([2459373.7,2458999.8,2458950.5,2458758.3,2458806.5,2458758.3,2458654.1,2458370.3])
-
-candidates_lc_dir = '../figures/candidates_lightcurves'
+ra = np.array([333.1687755,253.335125,242.066735231,314.2623926,225.377973463,314.0556855,343.776167,144.801206241])
+dec = np.array([+18.0510409,+27.435711,+6.82921933663,14.2044063,+4.87828907113,+12.8536367,+11.257611,-1.3396342480])
+JDasassn = np.array([2459089.9,2458962.9,2458634.9,2458618.9,2458519.6,2458316.8,2458286.1,2458070.8])
+JDicecube = np.array([2459373.7,2458999.8,2458950.5,2458758.3,2458806.5,2458758.3,2458654.1,2458370.3])
 
 corrupted = ['coadd_bq287843', 'coadd_bq286657', 'coadd_bE242641']
+
 
 def get_lc(name):
     
@@ -58,39 +48,6 @@ def get_lc(name):
         
     return jdass, jdice, data_dict, nu_name[0], itype[0]
     
-#     data=open('data/LC/%s_g.dat'%name,'r')
-#     lines=data.readlines()
-#     JD_g=[]
-#     mag_g=[]
-#     emag_g=[]
-#     for j in range(size(lines)):
-#         if (lines[j].split()[0]!='###'):
-
-#             JD_g.append(float(lines[j].split()[0])-jdass)
-#             if lines[j].split()[7][0]=='>':
-#                 mag_g.append(float(lines[j].split()[7][1:]))
-#             else:
-#                 mag_g.append(float(lines[j].split()[7]))
-#             emag_g.append(float(lines[j].split()[8]))
-
-
-#     data=open('data/LC/%s_V.dat'%name,'r')
-#     lines=data.readlines()
-#     JD_V=[]
-#     mag_V=[]
-#     emag_V=[]
-#     for j in range(size(lines)):
-#         if (lines[j].split()[0]!='###'):
-
-#             JD_V.append(float(lines[j].split()[0])-jdass)
-#             if lines[j].split()[7][0]=='>':
-#                 mag_V.append(float(lines[j].split()[7][1:]))
-#             else:
-#                 mag_V.append(float(lines[j].split()[7]))
-#             emag_V.append(float(lines[j].split()[8]))
-            
-#     return jdass, jdice, JD_g, mag_g, emag_g, JD_V, mag_V, emag_V, nu_name[0], itype[0]
-
 
 if __name__ == '__main__':
     

@@ -1,25 +1,21 @@
-import matplotlib
 from matplotlib.ticker import MultipleLocator
 import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
-import os, requests, pickle
-from astropy.time import Time
-from astropy.table import Table
+import os
 from astropy.coordinates import SkyCoord, Angle
 from astropy.io import fits
 from astropy import units as u
-from style import output_folder_figures, big_fontsize, base_width, base_height, dpi
-import seaborn as sns
-import json
-from alerts import get_alerts
-from astropy.time import Time
+
+from asassn_nu.info import output_folder_figures, data_dir
+from asassn_nu.style import base_width, base_height, dpi
+from asassn_nu.alerts import get_alerts
 
 
-fermi_matches_fn = "data"
+fermi_matches_fn = os.path.join(data_dir, "fermi_matches.csv")
 
 
-def make_fermi_mathces():
+def make_fermi_matches():
 
     #########################################################
     #           Loading Alerts
@@ -140,7 +136,15 @@ def make_fermi_mathces():
 
     ncp = len(fermi_matches[has_cp])
     print(f"{ncp} with counterpart, {len(fermi_matches) - ncp} without")
-    fermi_matches.to_csv('data/fermi_matches.csv')
+    fermi_matches.to_csv(fermi_matches_fn)
+
+
+def get_fermi_matches(force_new=False):
+    if (not os.path.isfile(fermi_matches_fn)) or force_new:
+        print("making fermi matches")
+        make_fermi_matches()
+
+    return pd.read_csv(fermi_matches_fn, index_col=[0, 1, 2])
 
 
 def make_fermi_matches_plots():
@@ -150,7 +154,16 @@ def make_fermi_matches_plots():
     #########################################################
 
     alerts = get_alerts()
-    m = ~alerts.retracted
+
+    #########################################################
+    #           Loading Fermi Matches
+    #########################################################
+
+    fermi_matches = get_fermi_matches()
+
+    #########################################################
+    #           Making Plots
+    #########################################################
 
     cmap = plt.get_cmap()
 
@@ -206,13 +219,13 @@ def make_fermi_matches_plots():
             ax.set_ylabel('Dec')
 
             fig.tight_layout()
-            fig.savefig(os.path.join(output_folder, f"{r.Event}.pdf"))
+            fig.savefig(os.path.join(output_folder_figures, f"{r.Event}.pdf"))
             try:
                 plt.show()
             finally:
                 plt.close()
 
 
-
 if __name__ == '__main__':
-    make_fermi_mathces()
+    make_fermi_matches()
+    make_fermi_matches_plots()

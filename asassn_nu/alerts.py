@@ -1,20 +1,15 @@
-import matplotlib
-import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
-import os, requests, warnings
-from astropy.time import Time
-from astropy.table import Table
+import os
+import requests
 from astropy.coordinates import SkyCoord
-# from style import output_folder, big_fontsize, base_width, base_height, dpi
-import seaborn as sns
-import json
 from astropy.time import Time
 from astropy import units as u
 
+from asassn_nu.info import data_dir
 
-alerts_fn = 'data/ASASSN_sample_paper_IceCube_info.csv'
 
+alerts_fn = os.path.join(data_dir, 'ASASSN_sample_paper_IceCube_info.csv')
 
 notice_summary_urls = {
     'BRONZE_GOLD': "https://gcn.gsfc.nasa.gov/amon_icecube_gold_bronze_events.html",
@@ -77,18 +72,20 @@ def get_notice_info(ic_name, alert_class, verbose=True):
             _decs = _selected["OBSERVATION"][f"Dec{_pos_ext}"]
             _coords = SkyCoord(_ras, _decs, unit='deg')
             _sep = _coords[0].separation(_coords[1]).deg
-            if verbose: print(f"\t{_sep:.2f} degrees apart")
+            if verbose:
+                print(f"\t{_sep:.2f} degrees apart")
                 
             if _sep > 1:
-                if verbose: print(f"\tassuming it's two alerts at the same day")
-                dates = [d.replace('/','-') for d in _selected['EVENT', 'Date']]
+                if verbose:
+                    print(f"\tassuming it's two alerts at the same day")
                 tstrings = np.array([f"20{_s['EVENT', 'Date'].replace('/','-')}T{_s['EVENT', 'Time UT']}"
                            for _, _s in _selected.iterrows()])
                 times = Time(tstrings)
                 _ind = np.argmin(times) if ic_name.endswith('A') else np.argmax(times) if ic_name.endswith('B') else None
                 
             else: 
-                if verbose: print(f"\tassuming second notice is refined info from circular. choosing first one")
+                if verbose:
+                    print(f"\tassuming second notice is refined info from circular. choosing first one")
                 _ind = 0
                 
         else:
@@ -181,18 +178,6 @@ def make_alerts():
         m = (comb.Event == row.Event) & (comb.Class == row.Class)
         comb.loc[m, new_cols] = parse_notice_info(row['Event'], row['Class'])
         
-#     for i, r in comb[comb.Class == 'HESE'].iterrows():
-#         selected, pos, error = get_notice_info(r.Event, r.Class)
-#         im = (comb.index == i) & (comb.Class == 'HESE')
-#         estimated_signalness = hese_signalness(selected['OBSERVATION']['Charge'])
-#         bigger_than_trackness = estimated_signalness > selected['OBSERVATION']['SignalTr']
-#         if np.any(bigger_than_trackness):
-#             #raise Exception(r, selected)
-#             warnings.warn(f"{r}\n{selected}")
-        
-#         comb.loc[im, 'Signalness'] = estimated_signalness
-        
-        
     comb.loc[comb.Class == 'EXTRA', 'Signalness'] = 0.5
     comb.loc[comb.Class == 'HESE', 'Signalness'] = np.nan
 
@@ -244,7 +229,6 @@ def get_alerts():
         names[i] += ' coverage'
 
     covered = pd.read_csv("../data/coverage_time_Jannis", sep='\t', names=names, skiprows=1)
-    m = np.array([r.Event in list(covered.Event) for _, r in alerts.iterrows()])
 
     for k in names[1:]:
         alerts[k] = np.nan
@@ -276,6 +260,7 @@ def get_alerts():
     alerts.loc[alerts.closest_obs.isna(), "closest_obs_side"] = np.nan
     
     return alerts
-    
+
+
 if __name__ == "__main__":
     make_alerts()
