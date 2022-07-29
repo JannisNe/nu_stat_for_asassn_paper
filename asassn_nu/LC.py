@@ -41,7 +41,7 @@ def get_lc(name):
     data_dict = dict()
     
     for band in ['g', 'V']:
-        with open(os.path.join('data/LC', f'{name}_{band}.dat'), 'r') as f:
+        with open(os.path.join('../data/LC', f'{name}_{band}.dat'), 'r') as f:
             buf = io.StringIO(f.read().split('### ')[-1].replace('flux (mJy)', 'flux(mJy)'))
         try:
             data = pd.read_csv(buf, delim_whitespace=True, comment='#')

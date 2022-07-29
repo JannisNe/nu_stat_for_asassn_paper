@@ -136,7 +136,7 @@ def hese_signalness(charge, verbose=True):
 
 
 def get_closest_obs_df():
-    with open("data/image_time", "r") as f:
+    with open("../data/image_time", "r") as f:
         lines = f.read().split("\n")
 
     dat = list()
@@ -161,9 +161,9 @@ def get_closest_obs_df():
     
 
 def make_alerts():
-    obs = pd.read_csv("data/nu_alerts_observed.csv", skiprows=[0, 1, 2])
+    obs = pd.read_csv("../data/nu_alerts_observed.csv", skiprows=[0, 1, 2])
     obs = obs[~np.isnan(obs["RA"])]
-    non = pd.read_csv("data/nu_alerts_unobserved.csv", skiprows=[0, 1], usecols=range(11))
+    non = pd.read_csv("../data/nu_alerts_unobserved.csv", skiprows=[0, 1], usecols=range(11))
     comb = pd.concat([obs, non], ignore_index=True)
 
     # Splitting the EHE and HESE info into two rows
@@ -243,7 +243,7 @@ def get_alerts():
     for i in range(1, len(names)):
         names[i] += ' coverage'
 
-    covered = pd.read_csv("data/coverage_time_Jannis", sep='\t', names=names, skiprows=1)
+    covered = pd.read_csv("../data/coverage_time_Jannis", sep='\t', names=names, skiprows=1)
     m = np.array([r.Event in list(covered.Event) for _, r in alerts.iterrows()])
 
     for k in names[1:]:

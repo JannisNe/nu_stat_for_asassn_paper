@@ -1,3 +1,4 @@
+import os
 import matplotlib.pyplot as plt
 import seaborn as sns
 sns.set_style("ticks")
@@ -5,7 +6,9 @@ sns.set_style("ticks")
 #plt.rc('text.latex', preamble=r'\usepackage{romanbar}')
 plt.rcParams["font.family"] = "sans-serif"
 
-output_folder = "../figures/"
+output_dir = os.getenv("ASASSN_NU_OUTPUT", "../../")
+output_folder_figures = os.path.join(output_dir, "figures")
+output_folder_latex = os.path.join(output_dir, "latex")
 
 dpi = 300
 
