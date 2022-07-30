@@ -51,8 +51,6 @@ def plot_lc(r, unit='flux', sigma=5, timerange=None):
         data = data[time_mask]
         mjd = np.array([Time(jd, format='jd').mjd for jd in data.JD])
 
-        alpha = np.zeros(len(data))
-
         if unit == 'flux':
             masks = [data['flux(mJy)'] < 5 * data.flux_err,
                      data['flux(mJy)'] >= 5 * data.flux_err]
@@ -179,3 +177,7 @@ def plot_fermi_matches_lightcurves():
         print(f"saving under {fn}")
         ax.set_xticks([58400, 58600, 58800, 59000])
         fig.savefig(fn)
+
+
+if __name__ == '__main__':
+    plot_fermi_matches_lightcurves()
