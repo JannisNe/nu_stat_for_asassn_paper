@@ -1,3 +1,4 @@
+import os
 import pandas as pd
 import matplotlib.pyplot as plt
 from astropy.time import Time
@@ -6,7 +7,7 @@ from matplotlib.ticker import FormatStrFormatter
 from matplotlib.legend_handler import HandlerTuple
 from astropy import units as u
 
-from asassn_nu.info import output_folder_figures
+from asassn_nu.info import output_folder_figures, data_dir
 from asassn_nu.style import base_height, base_width, dpi, bandcols, lc_errbar_kw, lc_uplim_kw, bandmark
 
 
@@ -29,9 +30,9 @@ neutrino_hjd_hsp = neutrino_time_helio.jd
 
 # ASAS-SN data
 hsp_fns = {
-    "difference phot. + reference": "data/3HSPJ095507+355101_diff_plus_ref_phot.csv",
-    "difference photometry": "data/3HSPJ095507+355101_diff_phot.csv",
-    "aperture phot.": "data/3HSPJ095507+355101_apperture_phot.csv"
+    "difference phot. + reference": os.path.join(data_dir, "3HSPJ095507+355101_diff_plus_ref_phot.csv"),
+    "difference photometry": os.path.join(data_dir, "3HSPJ095507+355101_diff_phot.csv"),
+    "aperture phot.": os.path.join(data_dir, "3HSPJ095507+355101_apperture_phot.csv")
 }
 hsp_datas = {k: pd.read_csv(v) for k, v in hsp_fns.items()}
 
@@ -52,7 +53,7 @@ tywin_neutrino_hjd = neutrino_time_helio.jd
 
 # ASAS-SN data
 tywin_fns = {
-    "difference photometry": "data/at2019fdr_asassn_dif_phot.csv",
+    "difference photometry": os.path.join(data_dir, "at2019fdr_asassn_dif_phot.csv"),
 }
 tywin_datas = {k: pd.read_csv(v) for k, v in tywin_fns.items()}
 
