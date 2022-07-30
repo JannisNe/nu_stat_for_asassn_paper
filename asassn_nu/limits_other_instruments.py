@@ -11,9 +11,9 @@ from scipy.interpolate import interp1d
 from flarestack.cosmo import define_cosmology_functions
 
 from asassn_nu.alerts import get_alerts
-from asassn_nu.info import output_folder_figures
+from asassn_nu.info import output_folder_figures, data_dir
 from asassn_nu.style import base_width, base_height, dpi, CB_color_cycle
-from asassn_nu.limits import rates, max_dl, cl, pval
+from asassn_nu.limits import rates, max_dl, cl, pval, upper_limits_fn
 
 
 # the list elements: declination range, completeness magnitude, color, linestyle
@@ -29,12 +29,19 @@ instruments = {
 ts = ['24h', '14d']
 
 
+def get_ztf_nu_limits(evolution):
+    fn = os.path.join(data_dir, f"ztf_nu_{evolution.lower()}.csv")
+    print("loading", fn)
+    return pd.read_csv(fn, sep=";", decimal=",", names=["abs_mag", "f"])
+
+
 #########################################################
 #           Calculate Population CDFs
 #########################################################
 
 def calculate_population_cdf():
 
+    print("calculating population cdf ...")
     nsteps = 1e4
     zrange, step = np.linspace(0.0, 800, int(nsteps + 1), retstep=True)
     cdf_mpc = dict()
@@ -131,7 +138,7 @@ def make_upper_limits_plots_other():
     use_alert_time_masked = use_alerts[time_mask]
 
     # select ZTF observed events
-    obs_evs = pd.read_csv("data/nu_alerts_observed.csv", skiprows=[0, 1, 2]).iloc[:-3].Event
+    obs_evs = pd.read_csv(os.path.join(data_dir, "nu_alerts_observed.csv"), skiprows=[0, 1, 2]).iloc[:-3].Event
     ztf_mask = list()
     for i, r in alerts.iterrows():
         ztf_mask.append(r.Event in list(obs_evs))
@@ -167,7 +174,7 @@ def make_upper_limits_plots_other():
 
     uls_assasn_res = copy.deepcopy(uls)
 
-    with open('data/asassn_ul.pkl', 'rb') as f:
+    with open(upper_limits_fn, 'rb') as f:
         uls_assasn_res['ASAS-SN'] = pickle.load(f)
 
     #########################################################
@@ -246,7 +253,7 @@ def make_upper_limits_plots_other():
         lw = 1
 
         if inst == 'ZTF':
-            dat = pd.read_csv(f"data/ztf_nu_{evolution.lower()}.csv", sep=";", decimal=",", names=["abs_mag", "f"])
+            dat = get_ztf_nu_limits(evolution)
             poly_coeff = np.polyfit(dat.abs_mag, dat.f, 6)
             max_f = np.poly1d(poly_coeff)
         else:
@@ -308,7 +315,7 @@ def make_upper_limits_plots_other():
         lw = 1
 
         if inst == 'ZTF':
-            dat = pd.read_csv(f"data/ztf_nu_{evolution.lower()}.csv", sep=";", decimal=",", names=["abs_mag", "f"])
+            dat = get_ztf_nu_limits(evolution)
             poly_coeff = np.polyfit(dat.abs_mag, dat.f, 6)
             max_f = np.poly1d(poly_coeff)
         else:
@@ -386,7 +393,7 @@ def make_upper_limits_plots_other():
             label = inst + r" ($N_\nu$" + f"={len(use_alerts_ztf)})"
 
         if inst == 'ZTF':
-            dat = pd.read_csv(f"data/ztf_nu_{evolution.lower()}.csv", sep=";", decimal=",", names=["abs_mag", "f"])
+            dat = get_ztf_nu_limits(evolution)
             poly_coeff = np.polyfit(dat.abs_mag, dat.f, 6)
             max_f = np.poly1d(poly_coeff)
         else:
