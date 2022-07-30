@@ -32,7 +32,10 @@ def make_fermi_matches():
             'Counterpart prob']
     fermi_matches = pd.DataFrame(columns=cols)
 
-    for cat, fn in zip(['3FHL', '4FGL'], ["data/gll_psch_v13.fit", "data/gll_psc_v27.fit"]):
+    for cat, fn in zip(
+            ['3FHL', '4FGL'],
+            [os.path.join(data_dir, "gll_psch_v13.fit"), os.path.join(data_dir, "gll_psc_v27.fit")]
+    ):
 
         with fits.open(fn) as fermi_cat:
             tab = fermi_cat[1]

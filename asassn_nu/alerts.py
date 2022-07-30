@@ -19,7 +19,7 @@ notice_summary_urls = {
 
 
 def get_summary_table(k, renew=False):
-    fn = f"data/gcn_notice_summary_{k}.html"
+    fn = os.path.join(data_dir, f"gcn_notice_summary_{k}.html")
     if not os.path.isfile(fn) or renew:
         _t = pd.read_html(requests.get(notice_summary_urls[k]).text)[0]
         _t.to_html(fn)
@@ -133,7 +133,7 @@ def hese_signalness(charge, verbose=True):
 
 
 def get_closest_obs_df():
-    with open("../data/image_time", "r") as f:
+    with open(os.path.join(data_dir, "image_time"), "r") as f:
         lines = f.read().split("\n")
 
     dat = list()
@@ -158,9 +158,9 @@ def get_closest_obs_df():
     
 
 def make_alerts():
-    obs = pd.read_csv("../data/nu_alerts_observed.csv", skiprows=[0, 1, 2])
+    obs = pd.read_csv(os.path.join(data_dir, "nu_alerts_observed.csv"), skiprows=[0, 1, 2])
     obs = obs[~np.isnan(obs["RA"])]
-    non = pd.read_csv("../data/nu_alerts_unobserved.csv", skiprows=[0, 1], usecols=range(11))
+    non = pd.read_csv(os.path.join(data_dir, "nu_alerts_unobserved.csv"), skiprows=[0, 1], usecols=range(11))
     comb = pd.concat([obs, non], ignore_index=True)
 
     # Splitting the EHE and HESE info into two rows
@@ -228,7 +228,7 @@ def get_alerts():
     for i in range(1, len(names)):
         names[i] += ' coverage'
 
-    covered = pd.read_csv("../data/coverage_time_Jannis", sep='\t', names=names, skiprows=1)
+    covered = pd.read_csv(os.path.join(data_dir, "coverage_time_Jannis"), sep='\t', names=names, skiprows=1)
 
     for k in names[1:]:
         alerts[k] = np.nan
