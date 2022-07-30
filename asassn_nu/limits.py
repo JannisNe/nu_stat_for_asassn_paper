@@ -243,3 +243,7 @@ def make_upper_lim_plot():
 
     plt.show()
     plt.close()
+
+
+if __name__ == '__main__':
+    make_upper_lim_plot()
