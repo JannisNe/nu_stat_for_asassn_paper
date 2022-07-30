@@ -87,7 +87,7 @@ def get_upper_limits(force_new=False):
     if (not os.path.isfile(upper_limits_fn)) or force_new:
         calculate_upper_limits()
 
-    with open(upper_limits_fn, "wb") as f:
+    with open(upper_limits_fn, "rb") as f:
         uls = pickle.load(f)
 
     return uls
