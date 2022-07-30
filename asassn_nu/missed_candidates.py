@@ -136,7 +136,8 @@ def plot_missed_candidates():
     fig.subplots_adjust(top=0.7)
     fig.subplots_adjust(left=0.1)
     # fig.tight_layout()
-    fig_fn = f"{output_folder_figures}at2019fdr_3hsp{k.replace(' ', '').replace('.', '')}.pdf"
+
+    fig_fn = os.path.join(output_folder_figures, f"at2019fdr_3hsp{k.replace(' ', '').replace('.', '')}.pdf")
     print(fig_fn)
     fig.savefig(fig_fn)
 
