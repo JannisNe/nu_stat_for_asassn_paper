@@ -1,26 +1,23 @@
-import matplotlib
 import matplotlib.pyplot as plt
-from matplotlib.ticker import FormatStrFormatter
 from matplotlib.legend_handler import HandlerTuple
-from matplotlib.container import Container
 import pandas as pd
 import numpy as np
-import os, requests, tarfile, zipfile, io
-from astropy.time import Time
-from astropy.table import Table
-from astropy.coordinates import SkyCoord
-from astropy.cosmology import Planck18 as cosmo
-from astropy import units as u, io
-# from style import output_folder, big_fontsize, base_width, base_height, dpi
-import seaborn as sns
-import json
+import os
+import io
+from astropy.io import ascii
 from astropy.time import Time
 
-from asassn_nu.info import output_folder_figures
+from asassn_nu.info import output_folder_figures, data_dir
 from style import base_width, base_height, dpi, bandmark, bandcols, lc_uplim_kw, lc_errbar_kw, big_fontsize
 
 
-candidates_lc_dir = os.path.join(output_folder_figures, '/candidates_lightcurves')
+candidates_lc_dir = os.path.join(data_dir, "LC")
+candidates_lc_plot_dir = os.path.join(output_folder_figures, 'candidates_lightcurves')
+
+
+def create_directory():
+    if not os.path.isdir(candidates_lc_plot_dir):
+        os.mkdir(candidates_lc_plot_dir)
 
 #########################################################
 #           Candidate Counterparts
@@ -58,7 +55,7 @@ def get_lc(name):
     data_dict = dict()
 
     for band in ['g', 'V']:
-        with open(os.path.join('../data/LC', f'{name}_{band}.dat'), 'r') as f:
+        with open(os.path.join(candidates_lc_dir, f'{name}_{band}.dat'), 'r') as f:
             buf = io.StringIO(f.read().split('### ')[-1].replace('flux (mJy)', 'flux(mJy)'))
         try:
             data = pd.read_csv(buf, delim_whitespace=True, comment='#')
@@ -115,6 +112,7 @@ def plot_lc(name, sigma=5):
 
 
 def make_candidates_plot():
+    create_directory()
     fig, axs = plt.subplots(nrows=3, ncols=2, figsize=(base_width * 2, base_height * 3), dpi=dpi, sharey='all',
                             gridspec_kw={'hspace': 0.35})
     sigma = 5
@@ -183,7 +181,7 @@ def make_candidates_plot():
                bbox_to_anchor=(0.5, 0.95),
                bbox_transform=fig.transFigure, loc='upper center', ncol=3)
 
-    fn = f'{candidates_lc_dir}/combined.pdf'
+    fn = f'{candidates_lc_plot_dir}/combined.pdf'
     print("saving under", fn)
     fig.savefig(fn)
 
@@ -196,11 +194,12 @@ def make_candidates_plot():
 #########################################################
 
 def get_ztffps_at2020rng():
-    tab = io.ascii.read('data/at2020rng_ztffps.txt')
+    create_directory()
+    tab = ascii.read(os.path.join(data_dir, 'at2020rng_ztffps.txt'))
     names = list(tab[0])
     names[6] = 'info'
     names = [i.strip(',') for i in names]
-    tab = io.ascii.read('data/at2020rng_ztffps.txt', names=names)[1:]
+    tab = ascii.read(os.path.join(data_dir, 'at2020rng_ztffps.txt'), names=names)[1:]
     tab = tab[tab['programid'] == '1']
     tab = tab[~(tab['forcediffimflux'] == 'null')]
 
@@ -296,7 +295,7 @@ def make_at2020rng_plot():
     ax.set_ylim([22, 16])
     plt.show()
 
-    fn = f"{candidates_lc_dir}/at2020rng.pdf"
+    fn = f"{candidates_lc_plot_dir}/at2020rng.pdf"
     print("saving under", fn)
     fig.savefig(fn, bbox_inches='tight')
 
