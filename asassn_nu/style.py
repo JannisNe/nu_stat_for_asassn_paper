@@ -1,8 +1,6 @@
 import matplotlib.pyplot as plt
-import seaborn as sns
 
 
-sns.set_style("ticks")
 plt.rcParams["font.family"] = "sans-serif"
 
 dpi = 300
