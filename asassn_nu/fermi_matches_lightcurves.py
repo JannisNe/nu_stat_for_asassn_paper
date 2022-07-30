@@ -114,6 +114,10 @@ def plot_lc(r, unit='flux', sigma=5, timerange=None):
 
 def plot_fermi_matches_lightcurves():
 
+    # make directory
+    if not os.path.isdir(fermi_lightcurves_plot_dir):
+        os.mkdir(fermi_lightcurves_plot_dir)
+
     #########################################################
     #           Loading Fermi Matches
     #########################################################
