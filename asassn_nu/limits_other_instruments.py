@@ -112,7 +112,7 @@ def calculate_upper_limits(the_alerts, declination_selection=True):
 #########################################################
 
 
-def make_upper_limits_plots():
+def make_upper_limits_plots_other():
 
     cdf_mpc = calculate_population_cdf()
 
@@ -427,4 +427,4 @@ def make_upper_limits_plots():
 
 
 if __name__ == '__main__':
-    make_upper_limits_plots()
+    make_upper_limits_plots_other()
