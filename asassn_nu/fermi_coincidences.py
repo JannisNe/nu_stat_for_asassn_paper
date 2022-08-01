@@ -37,8 +37,8 @@ def make_fermi_matches():
             [os.path.join(data_dir, "gll_psch_v13.fit"), os.path.join(data_dir, "gll_psc_v27.fit")]
     ):
 
-        with fits.open(fn) as fermi_cat:
-            tab = fermi_cat[1]
+        fermi_cat = fits.open(fn)
+        tab = fermi_cat[1]
 
         fermi_ra = tab.data["RAJ2000"]
         fermi_dec = tab.data["DEJ2000"]
