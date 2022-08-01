@@ -34,7 +34,10 @@ hsp_fns = {
     "difference photometry": os.path.join(data_dir, "3HSPJ095507+355101_diff_phot.csv"),
     "aperture phot.": os.path.join(data_dir, "3HSPJ095507+355101_apperture_phot.csv")
 }
-hsp_datas = {k: pd.read_csv(v) for k, v in hsp_fns.items()}
+
+def get_hsp_data():
+    return {k: pd.read_csv(v) for k, v in hsp_fns.items()}
+
 
 #########################################################
 #           AT2019fdr
@@ -55,7 +58,10 @@ tywin_neutrino_hjd = neutrino_time_helio.jd
 tywin_fns = {
     "difference photometry": os.path.join(data_dir, "at2019fdr_asassn_dif_phot.csv"),
 }
-tywin_datas = {k: pd.read_csv(v) for k, v in tywin_fns.items()}
+
+
+def get_at2019fdr_data():
+    return {k: pd.read_csv(v) for k, v in tywin_fns.items()}
 
 
 #########################################################
@@ -70,7 +76,7 @@ def plot_missed_candidates():
 
     for ax, data, neutrino_time, nuname, tname in zip(
         axs,
-        [hsp_datas[k], tywin_datas[k]],
+        [get_hsp_data()[k], get_at2019fdr_data()[k]],
         [hsp_neutrino_time, tyein_neutrino_time],
         ["IC2001072A", "IC200530A"],
         ["3HSPJ095507+355101", "AT2019fdr"]
