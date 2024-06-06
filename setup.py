@@ -26,7 +26,7 @@ if __name__ == '__main__':
             "pandas==1.4.1",
             "jupyterlab==3.2.9",
             "seaborn==0.11.2",
-            "numpy==1.22.3",
+            "numpy==1.23.1",
             "astropy==5.0.4",
             "scipy==1.9.0",
             "tqdm==4.64.0 ",
