@@ -30,7 +30,7 @@ if __name__ == '__main__':
             "astropy==5.0.4",
             "scipy==1.8.0",
             "tqdm==4.64.0 ",
-            "flarestack==2.4.4"
+            "flarestack==2.4.5"
         ],
         package_data={'timewise': [
             'wise_flux_conversion_correction.dat'
