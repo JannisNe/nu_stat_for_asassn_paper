@@ -22,7 +22,7 @@ if __name__ == '__main__':
         ],
         python_requires='>=3.9',
         install_requires=[
-            "matplotlib==3.5.1",
+            "matplotlib==3.5.2",
             "pandas==1.4.1",
             "jupyterlab==3.2.9",
             "seaborn==0.11.2",
