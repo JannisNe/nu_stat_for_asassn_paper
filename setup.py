@@ -28,7 +28,7 @@ if __name__ == '__main__':
             "seaborn==0.11.2",
             "numpy==1.22.3",
             "astropy==5.0.4",
-            "scipy==1.8.0",
+            "scipy==1.9.0",
             "tqdm==4.64.0 ",
             "flarestack==2.4.5"
         ],
